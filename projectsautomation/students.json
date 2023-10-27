@@ -1,0 +1,75 @@
+[
+    {
+        "name": "Ученик 1",
+        "tg_id": 123,
+        "skills": 1,
+        "time": 1,
+        "place_residence": true,
+        "is_active": true
+    },
+    {
+        "name": "Ученик 2",
+        "tg_id": 1233,
+        "skills": 2,
+        "time": 1,
+        "place_residence": false,
+        "is_active": true
+    },
+    {
+        "name": "Ученик 3",
+        "tg_id": 12333,
+        "skills": 3,
+        "time": 2,
+        "place_residence": true,
+        "is_active": true
+    },
+    {
+        "name": "Ученик 4",
+        "tg_id": 1233333,
+        "skills": 1,
+        "time": 3,
+        "place_residence": false,
+        "is_active": true
+    },
+    {
+        "name": "Ученик 5",
+        "tg_id": 12333334,
+        "skills": 1,
+        "time": 3,
+        "place_residence": false,
+        "is_active": true
+    },
+    {
+        "name": "Ученик 6",
+        "tg_id": 123333345,
+        "skills": 1,
+        "time": 2,
+        "place_residence": false,
+        "is_active": true
+    },
+    {
+        "name": "Ученик 7",
+        "tg_id": 122,
+        "skills": 3,
+        "time": 3,
+        "place_residence": false,
+        "is_active": true
+    },
+    {
+        "name": "Ученик 8",
+        "tg_id": 1222,
+        "skills": 1,
+        "time": 1,
+        "place_residence": false,
+        "is_active": true
+    },
+
+    {
+        "name": "Ученик 9",
+        "tg_id": 122222,
+        "skills": 2,
+        "time": 3,
+        "place_residence": false,
+        "is_active": true
+    }
+]
