@@ -3,11 +3,12 @@ import os
 import time
 import telebot
 from django.core.management.base import BaseCommand
+from projectsautomation import settings
 from telebot import types
 from dotenv import load_dotenv
 
 load_dotenv()
-token = '6559215887:AAGpcb66uOOVPLRuDMrN9SiJF1TEbSe50XI'
+token = settings.token
 bot = telebot.TeleBot(token)
 
 class Command(BaseCommand):
