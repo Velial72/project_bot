@@ -5,7 +5,8 @@
         "skills": 1,
         "time": 1,
         "place_residence": true,
-        "is_active": true
+        "is_active": true,
+        "email" : 'example@gmail.com'
     },
     {
         "name": "Ученик 2",
@@ -13,7 +14,8 @@
         "skills": 2,
         "time": 1,
         "place_residence": false,
-        "is_active": true
+        "is_active": true,
+        "email" : 'example@gmail.com'
     },
     {
         "name": "Ученик 3",
@@ -21,7 +23,8 @@
         "skills": 3,
         "time": 2,
         "place_residence": true,
-        "is_active": true
+        "is_active": true,
+        "email" : 'example@gmail.com'
     },
     {
         "name": "Ученик 4",
@@ -29,7 +32,8 @@
         "skills": 1,
         "time": 3,
         "place_residence": false,
-        "is_active": true
+        "is_active": true,
+        "email" : 'example@gmail.com'
     },
     {
         "name": "Ученик 5",
@@ -37,7 +41,8 @@
         "skills": 1,
         "time": 3,
         "place_residence": false,
-        "is_active": true
+        "is_active": true,
+        "email" : 'example@gmail.com'
     },
     {
         "name": "Ученик 6",
@@ -45,7 +50,8 @@
         "skills": 1,
         "time": 2,
         "place_residence": false,
-        "is_active": true
+        "is_active": true,
+        "email" : 'example@gmail.com'
     },
     {
         "name": "Ученик 7",
@@ -53,7 +59,8 @@
         "skills": 3,
         "time": 3,
         "place_residence": false,
-        "is_active": true
+        "is_active": true,
+        "email" : 'example@gmail.com'
     },
     {
         "name": "Ученик 8",
@@ -61,7 +68,8 @@
         "skills": 1,
         "time": 1,
         "place_residence": false,
-        "is_active": true
+        "is_active": true,
+        "email" : 'example@gmail.com'
     },
 
     {
@@ -70,6 +78,7 @@
         "skills": 2,
         "time": 3,
         "place_residence": false,
-        "is_active": true
+        "is_active": true,
+        "email" : 'example@gmail.com'
     }
 ]

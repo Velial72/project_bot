@@ -19,6 +19,7 @@ class Student(models.Model):
     time = models.PositiveIntegerField(verbose_name='Доступное время', choices=TIME_CHOICES, default=3, db_index=True)
     place_residence = models.BooleanField(verbose_name='Дальний восток', default=False)
     is_active = models.BooleanField(verbose_name='Участвует в проекте', default=True)
+    email = models.CharField(verbose_name='Почта ученика', max_length=255, default='example@gmail.com')
 
     def __str__(self):
         return self.name

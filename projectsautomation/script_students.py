@@ -14,7 +14,8 @@ if __name__ == '__main__':
                 skills=data['skills'],
                 time=data['time'],
                 place_residence=data['place_residence'],
-                is_active=data['is_active']
+                is_active=data['is_active'],
+                email=data['email']
 
             )
         print('Cтуденты успешно созданы из JSON файла.')
