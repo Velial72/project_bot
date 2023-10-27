@@ -1,20 +1,72 @@
 import os
 # import sqlite3
+from django.core.management.base import BaseCommand
 import time
 import telebot
-from django.core.management.base import BaseCommand
-from projectsautomation import settings
 from telebot import types
 from dotenv import load_dotenv
+import requests
+import json
+
 
 load_dotenv()
-token = settings.token
+token = os.getenv('TELEGRAM_BOT_TOKEN')
 bot = telebot.TeleBot(token)
+trello_key = os.getenv('TRELLO_KEY')
+trello_token = os.getenv('TRELLO_TOKEN')
+
+
+def create_board(name):
+    url = "https://api.trello.com/1/boards/"
+
+    query = {
+        'name': f'{name}',
+        'key': trello_key,
+        'token': trello_token
+    }
+    response = requests.post(url, params=query)
+
+
+def get_board_id(board_name):
+    url = f'https://api.trello.com/1/members/me/boards'
+    query = {
+        'key': trello_key,
+        'token': trello_token
+    }
+    response = requests.get(url, params=query)
+    boards = response.json()
+    board_id = None
+    for board in boards:
+        if board['name'] == board_name:
+            board_id = board['id']
+            break
+
+    return board_id
+
+
+def add_member(board_id, member, email):
+    url = f'https://api.trello.com/1/boards/{board_id}/members'
+    headers = {
+        "Content-Type": "application/json"
+    }
+    query = {
+        # Valid values: admin, normal, observer
+        'email': email,
+        'type': 'normal',
+        'key': trello_key,
+        'token': trello_token
+    }
+    payload = json.dumps({
+        "fullName": member
+    })
+
+    response = requests.put(url, data=payload, headers=headers, params=query)
+
 
 class Command(BaseCommand):
     help = 'Run the Telegram bot'
 
-    @bot.message_handler(content_types=['text'])
+    @bot.message_handler(commands=['start'])
     def start(message):
         markup = types.InlineKeyboardMarkup(row_width=2)
 
@@ -23,6 +75,16 @@ class Command(BaseCommand):
         markup.add(item1, item2)
 
         bot.send_message(message.chat.id, '\nПривет!\nСкажи кто ты?', reply_markup=markup)
+
+
+    @bot.message_handler(content_types=['text'])
+    def set_name_project(message):
+        markup = types.InlineKeyboardMarkup(row_width=2)
+        item1 = types.InlineKeyboardButton('Назад', callback_data='pm')
+        item2 = types.InlineKeyboardButton('Создать проект', callback_data='create_project')
+        markup.add(item1, item2)
+
+        bot.send_message(message.chat.id, message.text, reply_markup=markup)
 
 
     @bot.callback_query_handler(func=lambda call: True)
@@ -77,8 +139,24 @@ class Command(BaseCommand):
                 markup = types.InlineKeyboardMarkup(row_width=1)
                 item1 = types.InlineKeyboardButton('Назад', callback_data='pm')
                 markup.add(item1)
+
                 bot.edit_message_text(chat_id=call.message.chat.id,
-                                      message_id=call.message.id, text='\nТут будем создавать доски',
+                                      message_id=call.message.id, text='\n Введите название проекта',
+                                      reply_markup=markup)
+
+
+            elif call.data == 'create_project':
+                markup = types.InlineKeyboardMarkup(row_width=1)
+                item1 = types.InlineKeyboardButton('Назад', callback_data='pm')
+                markup.add(item1)
+                project_name = call.message.text
+                create_board(project_name)
+                board_id = get_board_id(project_name)
+                """Присылает на почту приглашение на доску, но только один раз.
+                Чтобы прислал еще раз необходимо удалить доску"""
+                add_member(board_id, call.message.chat.username, 'artemvlmorozov@gmail.com')
+                bot.edit_message_text(chat_id=call.message.chat.id,
+                                      message_id=call.message.id, text='\n Доска создана',
                                       reply_markup=markup)
 
             elif call.data == 'student':
@@ -112,6 +190,7 @@ class Command(BaseCommand):
                                                                        'Созвон в такое-то время.',
                                       reply_markup=markup)
 
+
     def handle(self, *args, **options):
         while True:
             try:
@@ -119,5 +198,4 @@ class Command(BaseCommand):
             except Exception as error:
                 print(error)
                 time.sleep(5)
-
 
