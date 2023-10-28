@@ -5,7 +5,7 @@ import telebot
 from telebot import types
 from dotenv import load_dotenv
 from .trello import create_board, get_board_id, add_member
-
+from ...models import Student
 
 load_dotenv()
 token = os.getenv('TELEGRAM_BOT_TOKEN')
@@ -17,12 +17,16 @@ class Command(BaseCommand):
 
     @bot.message_handler(commands=['start'])
     def start(message):
+        student_id = message.chat.id
+        student_name = message.from_user.first_name
         markup = types.InlineKeyboardMarkup(row_width=1)
         item1 = types.InlineKeyboardButton('Записаться на проект', callback_data='sing_in')
         item2 = types.InlineKeyboardButton('Связаться с ПМ', callback_data='message_to_pm')
         item3 = types.InlineKeyboardButton('Информация о проекте', callback_data='project_info')
         markup.add(item1, item2, item3)
-        bot.send_message(message.chat.id, text=f'\nКакой у тебя вопрос?', reply_markup=markup)
+
+        welcome_message = f'Привет, {student_name}!\nКакой у тебя вопрос?'
+        bot.send_message(student_id, text=welcome_message, reply_markup=markup)
 
 
     @bot.message_handler(commands=['pm'])
@@ -88,49 +92,60 @@ class Command(BaseCommand):
                                       message_id=call.message.id, text='\n Доска создана',
                                       reply_markup=markup)
 
+
+
+            # elif 'student_time' in call.data:
+            #     markup = types.InlineKeyboardMarkup(row_width=6)
+            #     flag = call.data.split('#')[1]
+            #     if flag == '1':
+            #         time = '10:00 - 14:00'
+            #         item1 = [types.InlineKeyboardButton(f'{hour + 1}:00', callback_data=f'entry#{hour + 1}:00') for hour
+            #                  in range(9, 13)]
+            #         item2 = [types.InlineKeyboardButton(f'{hour + 1}:30', callback_data=f'entry#{hour + 1}:30') for hour
+            #                  in range(9, 13)]
+            #     elif flag == '2':
+            #         time = '14:00 - 18:00'
+            #         item1 = [types.InlineKeyboardButton(f'{hour + 1}:00', callback_data=f'entry#{hour + 1}:00') for hour
+            #                  in range(13, 17)]
+            #         item2 = [types.InlineKeyboardButton(f'{hour + 1}:30', callback_data=f'entry#{hour + 1}:30') for hour
+            #                  in range(13, 17)]
+            #     else:
+            #         time = '18:00 - 22:00'
+            #         item1 = [types.InlineKeyboardButton(f'{hour + 1}:00', callback_data=f'entry#{hour + 1}:00') for hour
+            #                  in range(17, 21)]
+            #         item2 = [types.InlineKeyboardButton(f'{hour + 1}:30', callback_data=f'entry#{hour + 1}:30') for hour
+            #                  in range(17, 21)]
+            #     item3 = types.InlineKeyboardButton('Назад', callback_data='sing_in')
+            #     markup.add(*item1)
+            #     markup.add(*item2)
+            #     markup.add(item3)
+            #     bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.id,
+            #                           text='\nВыбери удобное время',
+            #                           parse_mode='Markdown', reply_markup=markup)
             elif call.data == 'sing_in':
                 markup = types.InlineKeyboardMarkup(row_width=1)
-                item1 = types.InlineKeyboardButton('10:00-14:00', callback_data='student_time#1')
-                item2 = types.InlineKeyboardButton('14:00 - 18:00', callback_data='student_time#2')
-                item3 = types.InlineKeyboardButton('18:00 - 22:00', callback_data='student_time#3')
+                item1 = types.InlineKeyboardButton('14:00-18:00', callback_data='entry#1')
+                item2 = types.InlineKeyboardButton('18:00-22:00', callback_data='entry#2')
+                item3 = types.InlineKeyboardButton('Любое время', callback_data='entry#3')
                 markup.add(item1, item2, item3)
                 bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.id,
                                       text='\nКогда тебе удобно участвовать в проекте?',
                                       parse_mode='Markdown', reply_markup=markup)
 
-            elif 'student_time' in call.data:
-                markup = types.InlineKeyboardMarkup(row_width=6)
-                flag = call.data.split('#')[1]
-                if flag == '1':
-                    time = '10:00 - 14:00'
-                    item1 = [types.InlineKeyboardButton(f'{hour + 1}:00', callback_data=f'entry#{hour + 1}:00') for hour
-                             in range(9, 13)]
-                    item2 = [types.InlineKeyboardButton(f'{hour + 1}:30', callback_data=f'entry#{hour + 1}:30') for hour
-                             in range(9, 13)]
-                elif flag == '2':
-                    time = '14:00 - 18:00'
-                    item1 = [types.InlineKeyboardButton(f'{hour + 1}:00', callback_data=f'entry#{hour + 1}:00') for hour
-                             in range(13, 17)]
-                    item2 = [types.InlineKeyboardButton(f'{hour + 1}:30', callback_data=f'entry#{hour + 1}:30') for hour
-                             in range(13, 17)]
-                else:
-                    time = '18:00 - 22:00'
-                    item1 = [types.InlineKeyboardButton(f'{hour + 1}:00', callback_data=f'entry#{hour + 1}:00') for hour
-                             in range(17, 21)]
-                    item2 = [types.InlineKeyboardButton(f'{hour + 1}:30', callback_data=f'entry#{hour + 1}:30') for hour
-                             in range(17, 21)]
-                item3 = types.InlineKeyboardButton('Назад', callback_data='sing_in')
-                markup.add(*item1)
-                markup.add(*item2)
-                markup.add(item3)
-                bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.id,
-                                      text='\nВыбери удобное время',
-                                      parse_mode='Markdown', reply_markup=markup)
 
-            elif 'entry' in call.data:
+            elif call.data.startswith('entry'):
                 flag = call.data.split('#')[1]
+                student_id=call.message.chat.id
+                student = Student.objects.get(tg_id=student_id)
+                if flag == '1':
+                    student.time = 1
+                elif flag == '2':
+                    student.time = 2
+                elif flag == '3':
+                    student.time = 3
+                student.save()
                 bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.id,
-                                      text=f'\nТы записан на {flag}.\nПозже с тобой свяжется ПМ',
+                                      text=f'\nТы записан на {student.get_time_display()}.\nПозже с тобой свяжется ПМ',
                                       parse_mode='Markdown')
                 
             elif call.data == 'message_to_pm':
@@ -158,4 +173,5 @@ class Command(BaseCommand):
             except Exception as error:
                 print(error)
                 time.sleep(5)
+
 
