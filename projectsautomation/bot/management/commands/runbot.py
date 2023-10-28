@@ -79,13 +79,27 @@ class Command(BaseCommand):
                                       text=f'\nТы выбрал период: {time}',
                                       parse_mode='Markdown', reply_markup=markup)
 
+
             elif call.data == 'team_info':
-                markup = types.InlineKeyboardMarkup(row_width=1)
-                item1 = types.InlineKeyboardButton('Команда 1', callback_data='---')
-                markup.add(item1)
-                bot.edit_message_text(chat_id=call.message.chat.id,
-                                      message_id=call.message.id, text='\nТут будет инфа о командах',
-                                      reply_markup=markup)
+                manager_tg_id = call.message.chat.id
+                manager = Manager.objects.filter(tg_id=manager_tg_id).first()
+
+                if manager is not None and manager.projects.exists():
+                    projects_info = ""
+                    for project in manager.projects.all():
+                        project_info = f'\nПроект: "{project.name}"\n'
+                        project_info += 'Команда:\n'
+                        for index, student in enumerate(project.students.all(), start=1):
+                            project_info += f'"{index}. {student.name}"\n'
+                        project_info += f'Время созвона: {project.time}\n'
+                        project_info += f'Дата созвона: {project.date.strftime("%Y-%m-%d")}\n'
+                        projects_info += project_info
+                    bot.edit_message_text(chat_id=call.message.chat.id,
+                                          message_id=call.message.id, text=projects_info)
+                else:
+                    bot.edit_message_text(chat_id=call.message.chat.id,
+                                          message_id=call.message.id, text='\nПроекты еще не созданы админом.')
+
 
             elif call.data == 'create_project':
                 markup = types.InlineKeyboardMarkup(row_width=1)
