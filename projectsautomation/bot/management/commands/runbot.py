@@ -4,12 +4,37 @@ import time
 import telebot
 from telebot import types
 from dotenv import load_dotenv
-from .trello import create_board, get_board_id, add_member
-from ...models import Student, Manager
+from ...models import Student, Manager, Project
+from .trello import create_board, get_boards_id, add_member, create_organization, get_organization
+
+
 
 load_dotenv()
 token = os.getenv('TELEGRAM_BOT_TOKEN')
 bot = telebot.TeleBot(token)
+
+project_data = {}
+# Словарь для отслеживания текущего состояния
+user_state = {}
+
+
+def process_start_time(message):
+    start_time = message.text
+    project_data[message.chat.id]['start_time'] = start_time
+    bot.send_message(message.chat.id,
+                     f'Время начала проекта: {start_time}\nВведите время завершения проекта (например, 15:00):')
+    bot.register_next_step_handler(message, process_end_time)
+
+
+def process_end_time(message):
+    markup = types.InlineKeyboardMarkup(row_width=2)
+    item1 = types.InlineKeyboardButton('Назад', callback_data='pm')
+    item2 = types.InlineKeyboardButton('Создать проект', callback_data='create_project')
+    markup.add(item1, item2)
+    end_time = message.text
+    project_data[message.chat.id]['end_time'] = end_time
+    bot.send_message(message.chat.id, 'Дату завершения проекта: ' + end_time)
+    bot.send_message(message.chat.id, 'Данные о проекте сохранены.', reply_markup=markup)
 
 
 class Command(BaseCommand):
@@ -26,7 +51,7 @@ class Command(BaseCommand):
         if manager:
             item1 = types.InlineKeyboardButton('Изменить время', callback_data='change_time')
             item2 = types.InlineKeyboardButton('Инфа о командах', callback_data='team_info')
-            item3 = types.InlineKeyboardButton('Создать доску', callback_data='create_project')
+            item3 = types.InlineKeyboardButton('Создать доску', callback_data='choose_project')
             markup.add(item1, item2, item3)
             welcome_message = f'Привет, {user_name}!'
             bot.send_message(user_id, text=welcome_message, reply_markup=markup)
@@ -49,10 +74,18 @@ class Command(BaseCommand):
             welcome_message = f'Привет, {user_name}! Вас еще не добавили в базу данных. Подождите и мы все исправим'
             bot.send_message(user_id, text=welcome_message, reply_markup=markup)
 
+    @bot.message_handler(func=lambda message: True)
+    def process_project_name(message):
+        project_name = message.text
+        project_data[message.chat.id] = {'name': project_name}
+        bot.send_message(message.chat.id,
+                         f'Название проекта: {project_name}\nВведите дату начала проекта')
+        bot.register_next_step_handler(message, process_start_time)
 
 
     @bot.callback_query_handler(func=lambda call: True)
     def callback(call):
+        chat_id = call.message.chat.id
         if call.message:
             if call.data == 'change_time':
                 markup = types.InlineKeyboardMarkup(row_width=1)
@@ -87,19 +120,55 @@ class Command(BaseCommand):
                                       message_id=call.message.id, text='\nТут будет инфа о командах',
                                       reply_markup=markup)
 
+            elif call.data == 'trello':
+                markup = types.InlineKeyboardMarkup(row_width=1)
+                item1 = types.InlineKeyboardButton('Назад', callback_data='pm')
+                markup.add(item1)
+
+                bot.edit_message_text(chat_id=call.message.chat.id,
+                                      message_id=call.message.id, text='\n Введите название время старта и проекта',
+                                      reply_markup=markup)
+            elif call.data == 'choose_project':
+                user_state[chat_id] = 'choose_organization'
+                organizations = get_organization()
+                markup = types.InlineKeyboardMarkup(row_width=1)
+                for organization_num, organization in enumerate(organizations):
+                    item_organization_num = types.InlineKeyboardButton(f'{organization["displayName"]}', callback_data=f'create_board_{organization["id"]}')
+                    markup.add(item_organization_num)
+                bot.edit_message_text(chat_id=call.message.chat.id,
+                                      message_id=call.message.id, text='\n В каком проекте создать доску?',
+                                      reply_markup=markup)
+
+            elif call.data.startswith('create_board_') and user_state.get(chat_id) == 'choose_organization':
+                selected_organization_id = call.data[len('create_board_'):]
+                students_values = Student.objects.all().values_list('name', flat=True)
+                students_list = list(students_values)
+                students = ', '.join(students_list)
+                # for i in range(3):
+                #     create_board(f'"21:30":{students}', selected_organization_id)
+                boards = get_boards_id(selected_organization_id)
+                for board in boards:
+                    # """Присылает на почту приглашение на доску, но только один раз.
+                    # Чтобы прислал еще раз необходимо удалить доску"""
+                    if not board['closed']:
+                        for student in students_list:
+                            add_member(board['id'], student, 'artemvlmorozov@gmail.com')
+                bot.send_message(chat_id, f'Доска создана, ученики добавлены и уведомлены')
+
             elif call.data == 'create_project':
                 markup = types.InlineKeyboardMarkup(row_width=1)
                 item1 = types.InlineKeyboardButton('Назад', callback_data='pm')
                 markup.add(item1)
-                project_name = call.message.text
-                create_board(project_name)
-                board_id = get_board_id(project_name)
-                """Присылает на почту приглашение на доску, но только один раз.
-                Чтобы прислал еще раз необходимо удалить доску"""
-                add_member(board_id, call.message.chat.username, 'artemvlmorozov@gmail.com')
+                create_organization(
+                    project_data[call.message.chat.id]['name'],
+                    project_data[call.message.chat.id]['start_time'],
+                    project_data[call.message.chat.id]['end_time']
+                    )
                 bot.edit_message_text(chat_id=call.message.chat.id,
-                                      message_id=call.message.id, text='\n Доска создана',
+                                      message_id=call.message.id, text='\n Проект создан',
                                       reply_markup=markup)
+
+
 
             elif call.data == 'sing_in':
                 markup = types.InlineKeyboardMarkup(row_width=1)

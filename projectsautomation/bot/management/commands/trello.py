@@ -8,10 +8,36 @@ load_dotenv()
 
 trello_key = os.getenv('TRELLO_KEY')
 trello_token = os.getenv('TRELLO_TOKEN')
-def create_board(name):
+
+
+
+def create_organization(project_name, project_start_date, project_end_date):
+    url = "https://api.trello.com/1/organizations"
+    headers = {
+        "Accept": "application/json"
+    }
+    query = {
+        'displayName': f'Проект {project_name} [{project_start_date}-{project_end_date}]',
+        'key': trello_key,
+        'token': trello_token
+    }
+    response = requests.post(url, headers=headers, params=query)
+
+def get_organization():
+    url = 'https://api.trello.com/1/members/me/organizations'
+
+    query = {
+        'key': trello_key,
+        'token': trello_token
+    }
+
+    response = requests.get(url, params=query)
+    return response.json()
+def create_board(name, project_name):
     url = "https://api.trello.com/1/boards/"
 
     query = {
+        'idOrganization': f'{project_name}',
         'name': f'{name}',
         'key': trello_key,
         'token': trello_token
@@ -19,21 +45,34 @@ def create_board(name):
     response = requests.post(url, params=query)
 
 
-def get_board_id(board_name):
-    url = f'https://api.trello.com/1/members/me/boards'
+def get_boards_id(project_name):
+    # url = f'https://api.trello.com/1/members/me/boards'
+    # query = {
+    #     'key': trello_key,
+    #     'token': trello_token
+    # }
+    # response = requests.get(url, params=query)
+    # boards = response.json()
+    # board_id = None
+    # for board in boards:
+    #     if board['name'] == board_name:
+    #         board_id = board['id']
+    #         break
+    #
+    # return board_id
+    url = f"https://api.trello.com/1/organizations/{project_name}/boards"
+    headers = {
+        "Accept": "application/json"
+    }
     query = {
         'key': trello_key,
         'token': trello_token
     }
-    response = requests.get(url, params=query)
-    boards = response.json()
-    board_id = None
-    for board in boards:
-        if board['name'] == board_name:
-            board_id = board['id']
-            break
 
-    return board_id
+    response = requests.get(url, headers=headers, params=query)
+    return response.json()
+
+    # print(json.dumps(json.loads(response.text), sort_keys=True, indent=4, separators=(",", ": ")))
 
 
 def add_member(board_id, member, email):
