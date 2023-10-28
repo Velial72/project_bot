@@ -5,7 +5,7 @@ import telebot
 from telebot import types
 from dotenv import load_dotenv
 from .trello import create_board, get_board_id, add_member
-from ...models import Student
+from ...models import Student, Manager
 
 load_dotenv()
 token = os.getenv('TELEGRAM_BOT_TOKEN')
@@ -17,36 +17,38 @@ class Command(BaseCommand):
 
     @bot.message_handler(commands=['start'])
     def start(message):
-        student_id = message.chat.id
-        student_name = message.from_user.first_name
+        user_id = message.chat.id
+        user_name = message.from_user.first_name
+        student = Student.objects.filter(tg_id=user_id).first()
+        manager = Manager.objects.filter(tg_id=user_id).first()
         markup = types.InlineKeyboardMarkup(row_width=1)
-        student = Student.objects.filter(tg_id=student_id).first()
-        if student is not None and student.projects.exists():
-            button_text = 'Отменить проект'
-            callback_data = 'cancel_project'
-        else:
-            button_text = 'Записаться на проект'
-            callback_data = 'sing_in'
-        sign_in_button = types.InlineKeyboardButton(button_text, callback_data=callback_data)
-        item2 = types.InlineKeyboardButton('Связаться с ПМ', callback_data='message_to_pm')
-        item3 = types.InlineKeyboardButton('Информация о проекте', callback_data='project_info')
-        markup.add(sign_in_button, item2, item3)
 
-        welcome_message = f'Привет, {student_name}!\nКакой у тебя вопрос?'
-        bot.send_message(student_id, text=welcome_message, reply_markup=markup)
-
-
-    @bot.message_handler(commands=['pm'])
-    def set_name_project(message):
-        if message.from_user.id == 66907613:
-            markup = types.InlineKeyboardMarkup(row_width=1)
+        if manager:
             item1 = types.InlineKeyboardButton('Изменить время', callback_data='change_time')
             item2 = types.InlineKeyboardButton('Инфа о командах', callback_data='team_info')
             item3 = types.InlineKeyboardButton('Создать доску', callback_data='create_project')
             markup.add(item1, item2, item3)
-            bot.send_message(message.chat.id, message.text, reply_markup=markup)
+            welcome_message = f'Привет, {user_name}!'
+            bot.send_message(user_id, text=welcome_message, reply_markup=markup)
+
+        elif student:
+            if student.projects.exists():
+                button_text = 'Отменить проект'
+                callback_data = 'cancel_project'
+            else:
+                button_text = 'Записаться на проект'
+                callback_data = 'sing_in'
+            sign_in_button = types.InlineKeyboardButton(button_text, callback_data=callback_data)
+            item2 = types.InlineKeyboardButton('Связаться с ПМ', callback_data='message_to_pm')
+            item3 = types.InlineKeyboardButton('Информация о проекте', callback_data='project_info')
+            markup.add(sign_in_button, item2, item3)
+            welcome_message = f'Привет, {user_name}!'
+            bot.send_message(user_id, text=welcome_message, reply_markup=markup)
+
         else:
-            bot.send_message(message.chat.id, text=f'\nТЕБЕ СЮДА НЕЛЬЗЯ!!!\n\nНажми "/start"')
+            welcome_message = f'Привет, {user_name}! Вас еще не добавили в базу данных. Подождите и мы все исправим'
+            bot.send_message(user_id, text=welcome_message, reply_markup=markup)
+
 
 
     @bot.callback_query_handler(func=lambda call: True)
