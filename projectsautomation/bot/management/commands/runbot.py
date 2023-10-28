@@ -156,15 +156,24 @@ class Command(BaseCommand):
                                       message_id=call.message.id, text='\nНапиши сообщение ПМу, он когда-нибудь ответит.',
                                       reply_markup=markup)
 
-            elif call.data == 'project_info':
-                bot.edit_message_text(chat_id=call.message.chat.id,
-                                      message_id=call.message.id, text='\nТвой проект: "Название"\n'
-                                                                       'Команда: \n"участник 1"'
-                                                                       '\n"участник 2"'
-                                                                       '\n"участник 3"\n'
-                                                                       'Ваш ПМ: "Егор"\n'
-                                                                       'Созвон в такое-то время.')
 
+            elif call.data == 'project_info':
+                student_tg_id = call.message.chat.id
+                student = Student.objects.filter(tg_id=student_tg_id).first()
+                if student is not None and student.projects.exists():
+                    project = student.projects.first()
+                    project_info = f'\nТвой проект: "{project.name}"\n'
+                    project_info += 'Команда:\n'
+                    for index, student in enumerate(project.students.all(), start=1):
+                        project_info += f'"{index}. {student.name}"\n'
+                    project_info += f'Ваш ПМ: "{project.manager.name}"\n'
+                    project_info += f'Время созвона: {project.time}\n'
+                    project_info += f'Дата созвона: {project.date.strftime("%Y-%m-%d")}\n'
+                    bot.edit_message_text(chat_id=call.message.chat.id,
+                                          message_id=call.message.id, text=project_info)
+                else:
+                    bot.edit_message_text(chat_id=call.message.chat.id,
+                                          message_id=call.message.id, text='\nТы еще не присоединен к проекту.')
 
     def handle(self, *args, **options):
         while True:
