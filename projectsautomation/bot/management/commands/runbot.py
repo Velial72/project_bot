@@ -1,6 +1,4 @@
 import os
-import random
-from datetime import datetime, timedelta
 from django.core.management.base import BaseCommand
 import time
 import telebot
@@ -8,10 +6,6 @@ from telebot import types
 from dotenv import load_dotenv
 from .trello import create_board, get_board_id, add_member
 from ...models import Student, Manager
-
-from ...models import Student, Manager, Administrator, Project
-from .trello import create_board, get_boards_id, add_member, create_organization, get_organization
-
 
 load_dotenv()
 token = os.getenv('TELEGRAM_BOT_TOKEN')
@@ -27,18 +21,9 @@ class Command(BaseCommand):
         user_name = message.from_user.first_name
         student = Student.objects.filter(tg_id=user_id).first()
         manager = Manager.objects.filter(tg_id=user_id).first()
-        administrator = Administrator.objects.filter(tg_id=user_id).first()
         markup = types.InlineKeyboardMarkup(row_width=1)
 
-        if administrator:
-            item1 = types.InlineKeyboardButton('Cписок учеников', callback_data='students_info')
-            item2 = types.InlineKeyboardButton('Cписок менеджеров', callback_data='pms_info')
-            item3 = types.InlineKeyboardButton('Сгенерировать команды', callback_data='create_comands')
-            item4 = types.InlineKeyboardButton('Оповестить о проекте', callback_data='send_alert')
-            markup.add(item1, item2, item3, item4)
-            welcome_message = f'Привет, {user_name}!'
-            bot.send_message(user_id, text=welcome_message, reply_markup=markup)
-        elif manager:
+        if manager:
             item1 = types.InlineKeyboardButton('Изменить время', callback_data='change_time')
             item2 = types.InlineKeyboardButton('Инфа о командах', callback_data='team_info')
             item3 = types.InlineKeyboardButton('Создать доску', callback_data='create_project')
@@ -63,33 +48,6 @@ class Command(BaseCommand):
         else:
             welcome_message = f'Привет, {user_name}! Вас еще не добавили в базу данных. Подождите и мы все исправим'
             bot.send_message(user_id, text=welcome_message, reply_markup=markup)
-
-
-
-    @bot.callback_query_handler(func=lambda call: call.data == 'send_alert')
-    def send_project_alert(call):
-        projects = Project.objects.all()
-        print(projects)
-        for project in projects:
-            students = project.students.all()
-            print(students)
-            alert_message = f'Уважаемые участники проекта "{project.name}"!\n\n'
-            project_info = f'Проект начнется {project.date} в {project.time}. Участвующие ученики: {", ".join([participant.name for participant in students])}\n\n'
-            alert_message += project_info
-
-            for student in students:
-                bot.send_message(chat_id=student.tg_id,
-                                 text=alert_message)
-
-        bot.send_message(call.message.chat.id, 'Оповещение о всех проектах отправлено всем участникам.')
-
-    @bot.message_handler(func=lambda message: True)
-    def process_project_name(message):
-        project_name = message.text
-        project_data[message.chat.id] = {'name': project_name}
-        bot.send_message(message.chat.id,
-                         f'Название проекта: {project_name}\nВведите дату начала проекта')
-        bot.register_next_step_handler(message, process_start_time)
 
 
 
@@ -227,166 +185,6 @@ class Command(BaseCommand):
                     bot.edit_message_text(chat_id=call.message.chat.id,
                                           message_id=call.message.id,
                                           text='\nВы успешно отменили свое участие в проекте.')
-
-
-            elif call.data == 'students_info':
-                students = Student.objects.all()
-                students_info = ""
-                for student in students:
-                    students_info += f'TG_ID: {student.tg_id}, Имя: {student.name}, Навыки: {student.get_skills_display()},Доступное время: {student.get_time_display()}\n\n'
-                if students_info:
-                    bot.edit_message_text(chat_id=call.message.chat.id,
-                                          message_id=call.message.id,
-                                          text=students_info)
-                else:
-                    bot.edit_message_text(chat_id=call.message.chat.id,
-                                          message_id=call.message.id,
-                                          text='\nСтудентов нет в базе данных.')
-
-            elif call.data == 'pms_info':
-                managers = Manager.objects.all()
-                managers_info = ""
-                for manager in managers:
-                    managers_info += f'TG_ID: {manager.tg_id}, Имя: {manager.name}, Доступное время: {manager.get_time_display()}\n\n'
-                if managers_info:
-                    bot.edit_message_text(chat_id=call.message.chat.id,
-                                          message_id=call.message.id,
-                                          text=managers_info)
-                else:
-                    bot.edit_message_text(chat_id=call.message.chat.id,
-                                          message_id=call.message.id,
-                                          text='\nМенеджеров нет в базе данных.')
-
-            elif call.data == 'create_comands':
-                today = datetime.now().date()
-                tomorrow = today + timedelta(days=1)
-                group_size = 3
-
-                morning_beginners = list(Student.objects.filter(time=1, skills=1))
-                evening_beginners = list(Student.objects.filter(time=2, skills=1))
-                any_time_beginners = list(Student.objects.filter(time=3, skills=1))
-
-                groups_beginners = []
-                for students in [evening_beginners, morning_beginners]:
-                    students.sort(key=lambda x: x.time, reverse=True)
-                    for i in range(0, len(students), group_size):
-                        group = list(students[i:i + group_size])
-                        groups_beginners.append(group)
-
-                for student in any_time_beginners:
-                    added_to_group = False
-                    for group in groups_beginners:
-                        if len(group) < group_size:
-                            group.append(student)
-                            added_to_group = True
-                            break
-                    if not added_to_group:
-                        groups_beginners.append([student])
-
-                morning_advanced = list(Student.objects.filter(time=1, skills=2))
-                evening_advanced = list(Student.objects.filter(time=2, skills=2))
-                any_time_advanced = list(Student.objects.filter(time=3, skills=3))
-                groups_advanced = []
-
-                for students in [evening_advanced, morning_advanced]:
-                    students.sort(key=lambda x: x.time, reverse=True)
-                    for i in range(0, len(students), group_size):
-                        group = list(students[i:i + group_size])
-                        groups_advanced.append(group)
-
-                for student in any_time_advanced:
-                    added_to_group = False
-                    for group in groups_advanced:
-                        if len(group) < group_size:
-                            group.append(student)
-                            added_to_group = True
-                            break
-                    if not added_to_group:
-                        groups_advanced.append([student])
-
-                morning_experts = list(Student.objects.filter(time=1, skills=3))
-                evening_experts = list(Student.objects.filter(time=2, skills=3))
-                any_time_experts = list(Student.objects.filter(time=3, skills=3))
-                groups_experts = []
-
-                for students in [evening_experts, morning_experts]:
-                    students.sort(key=lambda x: x.time, reverse=True)
-                    for i in range(0, len(students), group_size):
-                        group = list(students[i:i + group_size])
-                        groups_experts.append(group)
-
-                for student in any_time_experts:
-                    added_to_group = False
-                    for group in groups_experts:
-                        if len(group) < group_size:
-                            group.append(student)
-                            added_to_group = True
-                            break
-                    if not added_to_group:
-                        groups_experts.append([student])
-
-                managers = list(Manager.objects.all())
-                projects = []
-
-                for i, (beginner_group, advanced_group, expert_group) in enumerate(
-                        zip(groups_beginners, groups_advanced, groups_experts), start=1):
-                    beginner_manager = managers[i % len(managers)]
-                    advanced_manager = managers[(i + 1) % len(managers)]
-                    expert_manager = managers[(i + 2) % len(managers)]
-
-                    beginner_project = Project(
-                        name=f"Начинающая группа {i}",
-                        manager=beginner_manager,
-                        time=beginner_group[0].time,
-                        date=tomorrow
-                    )
-                    beginner_project.save()
-                    beginner_project.students.set(
-                        beginner_group)
-
-                    advanced_project = Project(
-                        name=f"Продвинутая группа {i}",
-                        manager=advanced_manager,
-                        time=advanced_group[0].time,
-                        date=tomorrow
-                    )
-                    advanced_project.save()
-                    advanced_project.students.set(advanced_group)
-
-                    expert_project = Project(
-                        name=f"Экспертная группа {i}",
-                        manager=expert_manager,
-                        time=expert_group[0].time,
-                        date=tomorrow
-                    )
-                    expert_project.save()
-                    expert_project.students.set(expert_group)
-
-                    projects.extend([beginner_project, advanced_project, expert_project])
-
-                project_info = "Созданные проекты на завтрашний день:\n"
-                for i, project in enumerate(projects, start=1):
-                    project_info += f"Проект {i}:\n"
-                    project_info += f"Название: {project.name}\n"
-                    project_info += f"Менеджер: {project.manager.name}\n"
-
-                    beginner_students = project.students.filter(skills=1)
-                    advanced_students = project.students.filter(skills=2)
-                    expert_students = project.students.filter(skills=3)
-
-                    if beginner_students.exists():
-                        project_info += f"Группа начинающих: {', '.join([student.name for student in beginner_students])}\n"
-                    if advanced_students.exists():
-                        project_info += f"Группа продвинутых: {', '.join([student.name for student in advanced_students])}\n"
-                    if expert_students.exists():
-                        project_info += f"Группа экспертов: {', '.join([student.name for student in expert_students])}\n"
-
-                    project_info += f"Время: {project.time}\n"
-                    project_info += f"Дата: {project.date}\n\n"
-
-                bot.send_message(chat_id=call.message.chat.id, text=project_info)
-
-
 
     @bot.message_handler(func=lambda message: True)
     def handle_user_message(message):

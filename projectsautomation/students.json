@@ -1,290 +1,84 @@
 [
     {
         "name": "Ученик 1",
-        "tg_id": 1,
+        "tg_id": 123,
         "skills": 1,
         "time": 1,
-        "place_residence": false,
+        "place_residence": true,
         "is_active": true,
-        "email" : "example1@gmail.com"
-    },
-    {
-        "name": "Ученик 12",
-        "tg_id": 12,
-        "skills": 1,
-        "time": 1,
-        "place_residence": false,
-        "is_active": true,
-        "email" : "example12@gmail.com"
-    },
-    {
-        "name": "Ученик 13",
-        "tg_id": 13,
-        "skills": 1,
-        "time": 1,
-        "place_residence": false,
-        "is_active": true,
-        "email" : "example13@gmail.com"
+        "email" : 'example@gmail.com'
     },
     {
         "name": "Ученик 2",
-        "tg_id": 2,
+        "tg_id": 1233,
         "skills": 2,
-        "time": 2,
+        "time": 1,
         "place_residence": false,
         "is_active": true,
-        "email" : "example2@gmail.com"
-    },
-    {
-        "name": "Ученик 22",
-        "tg_id": 21,
-        "skills": 2,
-        "time": 2,
-        "place_residence": false,
-        "is_active": true,
-        "email" : "example21@gmail.com"
-    },
-    {
-        "name": "Ученик 22",
-        "tg_id": 22,
-        "skills": 2,
-        "time": 2,
-        "place_residence": false,
-        "is_active": true,
-        "email" : "example22@gmail.com"
+        "email" : 'example@gmail.com'
     },
     {
         "name": "Ученик 3",
-        "tg_id": 3,
+        "tg_id": 12333,
         "skills": 3,
-        "time": 3,
-        "place_residence": false,
+        "time": 2,
+        "place_residence": true,
         "is_active": true,
-        "email" : "example3@gmail.com"
-    },
-    {
-        "name": "Ученик 31",
-        "tg_id": 31,
-        "skills": 3,
-        "time": 3,
-        "place_residence": false,
-        "is_active": true,
-        "email" : "example31@gmail.com"
-    },
-    {
-        "name": "Ученик 32",
-        "tg_id": 32,
-        "skills": 3,
-        "time": 3,
-        "place_residence": false,
-        "is_active": true,
-        "email" : "example32@gmail.com"
+        "email" : 'example@gmail.com'
     },
     {
         "name": "Ученик 4",
-        "tg_id": 4,
+        "tg_id": 1233333,
         "skills": 1,
-        "time": 2,
+        "time": 3,
         "place_residence": false,
         "is_active": true,
-        "email" : "example4@gmail.com"
-    },
-    {
-        "name": "Ученик 41",
-        "tg_id": 41,
-        "skills": 1,
-        "time": 2,
-        "place_residence": false,
-        "is_active": true,
-        "email" : "example41@gmail.com"
-    },
-    {
-        "name": "Ученик 42",
-        "tg_id": 42,
-        "skills": 1,
-        "time": 2,
-        "place_residence": false,
-        "is_active": true,
-        "email" : "example42@gmail.com"
+        "email" : 'example@gmail.com'
     },
     {
         "name": "Ученик 5",
-        "tg_id": 5,
+        "tg_id": 12333334,
         "skills": 1,
         "time": 3,
         "place_residence": false,
         "is_active": true,
-        "email" : "example5@gmail.com"
-    },
-    {
-        "name": "Ученик 51",
-        "tg_id": 51,
-        "skills": 1,
-        "time": 3,
-        "place_residence": false,
-        "is_active": true,
-        "email" : "example51@gmail.com"
-    },
-    {
-        "name": "Ученик 52",
-        "tg_id": 52,
-        "skills": 1,
-        "time": 3,
-        "place_residence": false,
-        "is_active": true,
-        "email" : "example52@gmail.com"
+        "email" : 'example@gmail.com'
     },
     {
         "name": "Ученик 6",
-        "tg_id": 6,
-        "skills": 2,
-        "time": 1,
+        "tg_id": 123333345,
+        "skills": 1,
+        "time": 2,
         "place_residence": false,
         "is_active": true,
-        "email" : "example6@gmail.com"
-    },
-    {
-        "name": "Ученик 62",
-        "tg_id": 62,
-        "skills": 2,
-        "time": 1,
-        "place_residence": false,
-        "is_active": true,
-        "email" : "example62@gmail.com"
-    },{
-        "name": "Ученик 63",
-        "tg_id": 63,
-        "skills": 2,
-        "time": 1,
-        "place_residence": false,
-        "is_active": true,
-        "email" : "example63@gmail.com"
+        "email" : 'example@gmail.com'
     },
     {
         "name": "Ученик 7",
-        "tg_id": 7,
+        "tg_id": 122,
         "skills": 3,
         "time": 3,
         "place_residence": false,
         "is_active": true,
-        "email" : "example7@gmail.com"
-    },
-    {
-        "name": "Ученик 71",
-        "tg_id": 71,
-        "skills": 3,
-        "time": 3,
-        "place_residence": false,
-        "is_active": true,
-        "email" : "example7@gmail.com"
-    },
-    {
-        "name": "Ученик 72",
-        "tg_id": 72,
-        "skills": 3,
-        "time": 3,
-        "place_residence": false,
-        "is_active": true,
-        "email" : "example7@gmail.com"
+        "email" : 'example@gmail.com'
     },
     {
         "name": "Ученик 8",
-        "tg_id": 8,
-        "skills": 3,
-        "time": 1,
-        "place_residence": true,
-        "is_active": true,
-        "email" : "example@gmail.com"
-    },
-    {
-        "name": "Ученик 81",
-        "tg_id": 81,
-        "skills": 3,
-        "time": 1,
-        "place_residence": true,
-        "is_active": true,
-        "email" : "example@gmail.com"
-    },
-    {
-        "name": "Ученик 82",
-        "tg_id": 82,
-        "skills": 3,
-        "time": 1,
-        "place_residence": true,
-        "is_active": true,
-        "email" : "example@gmail.com"
-    },
-    {
-        "name": "Ученик 91",
-        "tg_id": 9,
-        "skills": 3,
-        "time": 2,
-        "place_residence": false,
-        "is_active": true,
-        "email" : "example@gmail.com"
-    },
-    {
-        "name": "Ученик 92",
-        "tg_id": 91,
-        "skills": 3,
-        "time": 2,
-        "place_residence": false,
-        "is_active": true,
-        "email" : "example@gmail.com"
-    },
-    {
-        "name": "Ученик 9",
-        "tg_id": 92,
-        "skills": 3,
-        "time": 2,
-        "place_residence": false,
-        "is_active": true,
-        "email" : "example@gmail.com"
-    },
-    {
-        "name": "Ученик 54",
-        "tg_id": 12331231233334,
-        "skills": 1,
-        "time": 3,
-        "place_residence": false,
-        "is_active": true,
-        "email" : "example@gmail.com"
-    },
-    {
-        "name": "Ученик 16",
-        "tg_id": 12331232133345,
-        "skills": 1,
-        "time": 2,
-        "place_residence": false,
-        "is_active": true,
-        "email" : "example@gmail.com"
-    },
-    {
-        "name": "Ученик 74",
-        "tg_id": 121231232,
-        "skills": 3,
-        "time": 3,
-        "place_residence": false,
-        "is_active": true,
-        "email" : "example@gmail.com"
-    },
-    {
-        "name": "Ученик 85",
-        "tg_id": 122221222,
+        "tg_id": 1222,
         "skills": 1,
         "time": 1,
         "place_residence": false,
         "is_active": true,
-        "email" : "example@gmail.com"
+        "email" : 'example@gmail.com'
     },
 
     {
-        "name": "Ученик 95",
-        "tg_id": 12122222,
+        "name": "Ученик 9",
+        "tg_id": 122222,
         "skills": 2,
         "time": 3,
         "place_residence": false,
         "is_active": true,
-        "email" : "example@gmail.com"
+        "email" : 'example@gmail.com'
     }
 ]
