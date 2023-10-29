@@ -38,6 +38,13 @@ class Manager(models.Model):
     def __str__(self):
         return self.name
 
+class Administrator(models.Model):
+    id = models.AutoField(verbose_name='id', primary_key=True)
+    name = models.CharField(verbose_name='Имя менеджера', max_length=255)
+    tg_id = models.PositiveIntegerField(verbose_name='Telegram_id', unique=True)
+
+    def __str__(self):
+        return self.name
 
 class Project(models.Model):
     id = models.AutoField(verbose_name='id', primary_key=True)

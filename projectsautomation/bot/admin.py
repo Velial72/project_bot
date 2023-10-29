@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django import forms
 
-from .models import Student, Manager, Project
+from .models import Student, Manager, Project, Administrator
 
 
 @admin.register(Student)
@@ -10,6 +10,13 @@ class StudentAdmin(admin.ModelAdmin):
         'name',
         'skills',
         'place_residence',
+        'time',
+    ]
+
+@admin.register(Administrator)
+class AdministratorAdmin(admin.ModelAdmin):
+    list_display = [
+        'name',
     ]
 
 
