@@ -67,19 +67,22 @@ class Command(BaseCommand):
     def start(message):
         user_id = message.chat.id
         user_name = message.from_user.first_name
+
+        administrator = Administrator.objects.filter(tg_id=user_id).first()
         student = Student.objects.filter(tg_id=user_id).first()
         manager = Manager.objects.filter(tg_id=user_id).first()
-        markup = types.InlineKeyboardMarkup(row_width=1)
-        administrator = Administrator.objects.filter(tg_id=user_id).first()
 
         if administrator:
-            item1 = types.InlineKeyboardButton('Cписок учеников', callback_data='students_info')
-            item2 = types.InlineKeyboardButton('Cписок менеджеров', callback_data='pms_info')
-            item3 = types.InlineKeyboardButton('Сгенерировать команды', callback_data='create_comands')
+            markup = types.InlineKeyboardMarkup(row_width=1)
+            item1 = types.InlineKeyboardButton('Список учеников', callback_data='students_info')
+            item2 = types.InlineKeyboardButton('Список менеджеров', callback_data='pms_info')
+            item3 = types.InlineKeyboardButton('Сгенерировать команды', callback_data='create_commands')
             item4 = types.InlineKeyboardButton('Оповестить о проекте', callback_data='send_alert')
             markup.add(item1, item2, item3, item4)
 
+            bot.send_message(user_id, text="Выберите опцию:", reply_markup=markup)
         elif manager:
+            markup = types.InlineKeyboardMarkup(row_width=1)
             item1 = types.InlineKeyboardButton('Изменить время', callback_data='change_time')
             item2 = types.InlineKeyboardButton('Инфа о командах', callback_data='team_info')
             item3 = types.InlineKeyboardButton('Создать проект на Trello', callback_data='trello')
@@ -88,8 +91,8 @@ class Command(BaseCommand):
             markup.add(item1, item2, item3, item4, item5)
             welcome_message = f'Привет, {user_name}!'
             bot.send_message(user_id, text=welcome_message, reply_markup=markup)
-
         elif student:
+            markup = types.InlineKeyboardMarkup(row_width=1)
             if student.projects.exists():
                 button_text = 'Отменить проект'
                 callback_data = 'cancel_project'
@@ -106,6 +109,7 @@ class Command(BaseCommand):
         else:
             welcome_message = f'Привет, {user_name}! Вас еще не добавили в базу данных. Подождите и мы все исправим'
             bot.send_message(user_id, text=welcome_message, reply_markup=markup)
+
 
     @bot.callback_query_handler(func=lambda call: call.data == 'send_alert')
     def send_project_alert(call):
