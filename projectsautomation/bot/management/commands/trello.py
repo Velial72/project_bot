@@ -46,20 +46,6 @@ def create_board(name, project_name):
 
 
 def get_boards_id(project_name):
-    # url = f'https://api.trello.com/1/members/me/boards'
-    # query = {
-    #     'key': trello_key,
-    #     'token': trello_token
-    # }
-    # response = requests.get(url, params=query)
-    # boards = response.json()
-    # board_id = None
-    # for board in boards:
-    #     if board['name'] == board_name:
-    #         board_id = board['id']
-    #         break
-    #
-    # return board_id
     url = f"https://api.trello.com/1/organizations/{project_name}/boards"
     headers = {
         "Accept": "application/json"

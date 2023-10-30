@@ -9,20 +9,26 @@ from dotenv import load_dotenv
 from ...models import Student, Manager, Project, Administrator
 from .trello import create_board, get_boards_id, add_member, create_organization, get_organization
 
-
-
 load_dotenv()
 token = os.getenv('TELEGRAM_BOT_TOKEN')
 bot = telebot.TeleBot(token)
 
-project_data = {}
+trello_data = {}
+discord_data = {}
 # Словарь для отслеживания текущего состояния
 user_state = {}
 
 
+def process_project_name(message):
+    project_name = message.text
+    trello_data[message.chat.id] = {'name': project_name}
+    bot.send_message(message.chat.id,
+                     f'Название проекта: {project_name}\nВведите дату начала проекта')
+    bot.register_next_step_handler(message, process_start_time)
+
 def process_start_time(message):
     start_time = message.text
-    project_data[message.chat.id]['start_time'] = start_time
+    trello_data[message.chat.id]['start_time'] = start_time
     bot.send_message(message.chat.id,
                      f'Дата начала проекта: {start_time}\nВведите дату завершения проекта')
     bot.register_next_step_handler(message, process_end_time)
@@ -33,10 +39,26 @@ def process_end_time(message):
     item1 = types.InlineKeyboardButton('Создать проект', callback_data='create_project')
     markup.add(item1)
     end_time = message.text
-    project_data[message.chat.id]['end_time'] = end_time
+    trello_data[message.chat.id]['end_time'] = end_time
     bot.send_message(message.chat.id, 'Датa завершения проекта: ' + end_time)
     bot.send_message(message.chat.id, 'Данные о проекте сохранены.', reply_markup=markup)
 
+
+def process_server_name(message):
+    server_name = message.text
+    discord_data[message.chat.id] = {'name': server_name}
+    bot.send_message(message.chat.id,
+                     f'Название проекта: {server_name}\nВведите месяц проекта')
+    bot.register_next_step_handler(message, process_month)
+
+def process_month(message):
+    markup = types.InlineKeyboardMarkup(row_width=1)
+    item1 = types.InlineKeyboardButton('Создать проект', callback_data='create_server')
+    markup.add(item1)
+    month = message.text
+    discord_data[message.chat.id]['month'] = month
+    bot.send_message(message.chat.id, 'Датa завершения проекта: ' + month)
+    bot.send_message(message.chat.id, 'Данные о проекте сохранены.', reply_markup=markup)
 
 class Command(BaseCommand):
     help = 'Run the Telegram bot'
@@ -60,8 +82,10 @@ class Command(BaseCommand):
         elif manager:
             item1 = types.InlineKeyboardButton('Изменить время', callback_data='change_time')
             item2 = types.InlineKeyboardButton('Инфа о командах', callback_data='team_info')
-            item3 = types.InlineKeyboardButton('Создать доску', callback_data='create_project')
-            markup.add(item1, item2, item3)
+            item3 = types.InlineKeyboardButton('Создать проект на Trello', callback_data='trello')
+            item4 = types.InlineKeyboardButton('Создать доску', callback_data='choose_project')
+            item5 = types.InlineKeyboardButton('Создать сервер на Discord', callback_data='discord')
+            markup.add(item1, item2, item3, item4, item5)
             welcome_message = f'Привет, {user_name}!'
             bot.send_message(user_id, text=welcome_message, reply_markup=markup)
 
@@ -103,11 +127,10 @@ class Command(BaseCommand):
     @bot.message_handler(func=lambda message: True)
     def process_project_name(message):
         project_name = message.text
-        project_data[message.chat.id] = {'name': project_name}
+        trello_data[message.chat.id] = {'name': project_name}
         bot.send_message(message.chat.id,
                          f'Название проекта: {project_name}\nВведите дату начала проекта')
         bot.register_next_step_handler(message, process_start_time)
-
 
     @bot.callback_query_handler(func=lambda call: True)
     def callback(call):
@@ -161,10 +184,11 @@ class Command(BaseCommand):
 
 
             elif call.data == 'trello':
-
                 bot.edit_message_text(chat_id=call.message.chat.id,
                                       message_id=call.message.id, text='\n Введите название проекта',
                                       )
+                bot.register_next_step_handler(call.message, process_project_name)
+
             elif call.data == 'choose_project':
                 user_state[chat_id] = 'choose_organization'
                 organizations = get_organization()
@@ -188,8 +212,8 @@ class Command(BaseCommand):
                 students_values = Student.objects.all().values_list('name', flat=True)
                 students_list = list(students_values)
                 students = ', '.join(students_list)
-                # for i in range(3):
-                #     create_board(f'"21:30":{students}', selected_organization_id)
+                for i in range(3):
+                    create_board(f'"21:30":{students}', selected_organization_id)
                 boards = get_boards_id(selected_organization_id)
                 for board in boards:
                     # """Присылает на почту приглашение на доску, но только один раз.
@@ -201,14 +225,22 @@ class Command(BaseCommand):
 
             elif call.data == 'create_project':
                 create_organization(
-                    project_data[call.message.chat.id]['name'],
-                    project_data[call.message.chat.id]['start_time'],
-                    project_data[call.message.chat.id]['end_time']
+                    trello_data[call.message.chat.id]['name'],
+                    trello_data[call.message.chat.id]['start_time'],
+                    trello_data[call.message.chat.id]['end_time']
                     )
                 bot.edit_message_text(chat_id=call.message.chat.id,
                                       message_id=call.message.id, text='\n Проект создан',
                                       )
 
+            elif call.data == 'discord':
+                bot.edit_message_text(chat_id=call.message.chat.id,
+                                      message_id=call.message.id, text='\n Введите название сервера',
+                                      )
+                bot.register_next_step_handler(call.message, process_server_name)
+
+            elif call.data == 'create_server':
+                server_name = f"Девман. Проект {discord_data[call.message.chat.id]['name']}. {discord_data[call.message.chat.id]['month']}."
 
             elif call.data == 'sing_in':
                 markup = types.InlineKeyboardMarkup(row_width=1)
