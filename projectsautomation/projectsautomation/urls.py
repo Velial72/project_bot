@@ -15,7 +15,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from bot import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('import_students/', views.import_students, name='import_students'),
+    path('import_managers/', views.import_managers, name='import_managers'),
+    path('generate_groups/', views.generate_groups, name='generate_groups'),
+    path('send_alert/', views.send_alert, name='send_alert'),
 ]

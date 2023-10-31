@@ -6,14 +6,17 @@ from .models import Student, Manager, Project, Administrator
 
 @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):
+
     list_display = [
         'name',
         'skills',
         'place_residence',
+        'time',
     ]
 
 @admin.register(Administrator)
 class AdministratorAdmin(admin.ModelAdmin):
+    change_list_template = 'admin/model_change_list.html'
     list_display = [
         'name',
 

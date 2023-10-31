@@ -1,0 +1,22 @@
+{% extends 'admin/change_list.html' %}
+
+{% block object-tools %}
+  <form action="{% url 'import_students' %}" method="POST">
+    {% csrf_token %}
+    <input type="submit" value="Импорт студентов" />
+  </form>
+  <form action="{% url 'import_managers' %}" method="POST">
+    {% csrf_token %}
+    <input type="submit" value="Импорт менеджеров" />
+  </form>
+  <form action="{% url 'generate_groups' %}" method="POST">
+    {% csrf_token %}
+    <input type="submit" value="Сгенерировать группы" />
+  </form>
+  <form action="{% url 'send_alert' %}" method="POST">
+    {% csrf_token %}
+    <input type="submit" value="Оповестить участников" />
+  </form>
+    {{ block.super }}
+
+{% endblock %}

@@ -272,7 +272,7 @@
         "name": "Ученик 85",
         "tg_id": 122221222,
         "skills": 1,
-        "time": 1,
+        "time": 2,
         "place_residence": false,
         "is_active": true,
         "email": "example@gmail.com"
