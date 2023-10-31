@@ -95,6 +95,7 @@ class Command(BaseCommand):
             bot.send_message(user_id, text=welcome_message, reply_markup=markup)
 
         else:
+            markup = types.InlineKeyboardMarkup(row_width=1)
             welcome_message = f'Привет, {user_name}! Вас еще не добавили в базу данных. Подождите и мы все исправим'
             bot.send_message(user_id, text=welcome_message, reply_markup=markup)
 

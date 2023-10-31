@@ -3,7 +3,6 @@ import json
 import telebot
 import random
 from itertools import zip_longest
-from telegram.error import TelegramError
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from django.http import HttpResponse
